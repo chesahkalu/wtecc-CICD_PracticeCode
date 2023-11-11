@@ -39,3 +39,38 @@ spec:
       image: bitnami/git:latest  # Docker image to use in this step (Git)
       command: [git]  # The command to run in the container
       args: ["clone", "--branch", "$(params.branch)", "$(params.repo-url)"]  # Arguments to the git command to clone a specific branch from the given repo URL
+
+    # Define some mock steps to simulate the rest of the CI/CD process using the echo task  
+    - name: lint
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Calling Flake8 linter..."
+      runAfter:
+        - clone
+
+    - name: tests
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Running unit tests with PyUnit..."
+      runAfter:
+        - lint
+
+    - name: build
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Building image for $(params.repo-url) ..."
+      runAfter:
+        - tests
+
+    - name: deploy
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Deploying $(params.branch) branch of $(params.repo-url) ..."
